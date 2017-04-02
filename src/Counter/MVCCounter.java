@@ -5,9 +5,10 @@ import javafx.stage.Stage;
 import java.io.*;
 
 public class MVCCounter extends Application {
-    //main in bottom
 
+    //file name
     final static String FILE_NAME = "user_config.ser";
+
     private CounterController controller;
 
     public void start(Stage stage) {

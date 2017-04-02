@@ -39,6 +39,7 @@ public class CounterView extends Stage implements Observer{
         //generate GUI
         drawControllerWindow("Controller 1", 1300, controller);
         drawControllerWindow("Controller 2", 900, controller);
+        drawControllerWindowWithTimer("Controller 3 (with timer)", 600, controller);
         drawTimerWindow("Timer 1", 1300);
         drawTimerWindow("Timer 2", 900);
 
@@ -66,8 +67,8 @@ public class CounterView extends Stage implements Observer{
         Button resetButton = new Button("Reset timer");
 
         //label for timer state. value changed based on runningProperty's changeListener
-        String timersRunning = "Watches are running";
-        String timersStopped = "Watches are not running";
+        String timersRunning = "Timers are running.";
+        String timersStopped = "Timers are not running.";
         Label runningStateLabel = new Label(controller.isRunning() ? timersRunning : timersStopped);
         controller.runningProperty().addListener((observable, oldValue, newValue) ->
                 runningStateLabel.setText(newValue ? timersRunning : timersStopped)
@@ -144,6 +145,64 @@ public class CounterView extends Stage implements Observer{
         stage.setTitle(title);
         stage.setScene(new Scene(root, 220, 80));
         stage.show();
+    }
+
+    private void drawControllerWindowWithTimer(String title, int xPos, CounterController controller) {
+
+        //layout elements
+        Stage stage = new Stage();
+        FlowPane root = new FlowPane();
+        VBox columnBox = new VBox(5);
+        HBox firstLineBox = new HBox(0);
+        HBox secondLineBox = new HBox(10);
+        Label timerLabel = new Label();
+
+        //binds the timerLabel value to timerTextProperty
+        timerLabel.textProperty().bind(timerTextProperty);
+
+        //buttons
+        Button startButton = new Button("Start timer");
+        Button stopButton = new Button("Stop timer");
+        Button resetButton = new Button("Reset timer");
+
+        //label for timer state. value changed based on runningProperty's changeListener
+        String timersRunning = "Timers are running. Current time: ";
+        String timersStopped = "Timers are not running. Current time: ";
+        Label runningStateLabel = new Label(controller.isRunning() ? timersRunning : timersStopped);
+        controller.runningProperty().addListener((observable, oldValue, newValue) ->
+                runningStateLabel.setText(newValue ? timersRunning : timersStopped)
+        );
+        setTimerText();
+
+        //add nodes to elements
+        firstLineBox.getChildren().addAll(runningStateLabel, timerLabel);
+        secondLineBox.getChildren().addAll(startButton, stopButton, resetButton);
+        columnBox.getChildren().addAll(firstLineBox, secondLineBox);
+        root.getChildren().addAll(columnBox);
+
+        //spacing
+        root.setPadding(defaultPadding);
+
+        //stage positioning
+        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+        stage.setX((primScreenBounds.getWidth() - xPos));
+        stage.setY((primScreenBounds.getHeight() - 400));
+
+        //user closes the window
+        stage.setOnCloseRequest(e -> close());
+
+        //create scene & display it
+        stage.setTitle(title);
+        stage.setScene(new Scene(root, 300, 75));
+        stage.show();
+
+        //bind disableProperty of buttons to runningProperty
+        startButton.disableProperty().bind(controller.runningProperty());
+        stopButton.disableProperty().bind(controller.runningProperty().not());
+
+        startButton.setOnAction(e -> controller.start());
+        stopButton.setOnAction(e -> controller.stop());
+        resetButton.setOnAction(e -> controller.reset());
     }
 
     Label createLabel(String text) {
